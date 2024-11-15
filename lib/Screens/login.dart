@@ -1,9 +1,8 @@
+import 'package:engage_wise/Screens/register.dart';
 import 'package:flutter/material.dart';
 
 class Login extends StatefulWidget {
-  const Login({
-    Key? key,
-  }) : super(key: key);
+  static const routeName = '/sign-in';
 
   @override
   State<Login> createState() => _LoginState();
@@ -132,15 +131,7 @@ class _LoginState extends State<Login> {
                       TextButton(
                         onPressed: () {
                           _formKey.currentState?.reset();
-
-                          // Navigator.push(
-                          //   context,
-                          //   MaterialPageRoute(
-                          //     builder: (context) {
-                          //       return const Signup();
-                          //     },
-                          //   ),
-                          // );
+                          Navigator.of(context).pushNamed(Signup.routeName);
                         },
                         child: const Text("Signup"),
                       ),
