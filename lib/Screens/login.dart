@@ -1,91 +1,165 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
-class LoginScreen extends StatefulWidget {
+class Login extends StatefulWidget {
+  const Login({
+    Key? key,
+  }) : super(key: key);
+
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  State<Login> createState() => _LoginState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _scaffoldKey = GlobalKey<ScaffoldState>();
+class _LoginState extends State<Login> {
+  final GlobalKey<FormState> _formKey = GlobalKey();
 
-  String _username = '', _password = '';
+  final FocusNode _focusNodePassword = FocusNode();
+  final TextEditingController _controllerUsername = TextEditingController();
+  final TextEditingController _controllerPassword = TextEditingController();
 
-  Future<void> _login() async {
-    if (_formKey.currentState.validate()) {
-      _formKey.currentState.save();
-
-      final response = await http.post(
-        'https://reqres.in/api/login',
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'email': _username,
-          'password': _password,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final jsonData = jsonDecode(response.body);
-        final token = jsonData['token'];
-
-        Scaffold.of(context).showSnackBar(
-            SnackBar(content: Text('Welcome, your token is $token')));
-      } else {
-        Scaffold.of(context)
-            .showSnackBar(SnackBar(content: Text('Invalid credentials')));
-      }
-    }
-  }
+  bool _obscurePassword = true;
 
   @override
   Widget build(BuildContext context) {
+    // if (_boxLogin.get("loginStatus") ?? false) {
+    //   //return Home();
+    // }
+
     return Scaffold(
-      key: _scaffoldKey,
-      appBar: AppBar(
-        title: Text('Login Screen'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Form(
-          key: _formKey,
+      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+      body: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(30.0),
           child: Column(
-            children: <Widget>[
+            children: [
+              const SizedBox(height: 150),
+              Text(
+                "Welcome back",
+                style: Theme.of(context).textTheme.headlineLarge,
+              ),
+              const SizedBox(height: 10),
+              Text(
+                "Login to your account",
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 60),
               TextFormField(
+                controller: _controllerUsername,
+                keyboardType: TextInputType.name,
                 decoration: InputDecoration(
-                  labelText: 'Email',
+                  labelText: "Username",
+                  prefixIcon: const Icon(Icons.person_outline),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
-                validator: (value) {
-                  if (value.isEmpty) {
-                    return 'Please enter an email';
+                onEditingComplete: () => _focusNodePassword.requestFocus(),
+                validator: (String? value) {
+                  if (value == null || value.isEmpty) {
+                    return "Please enter username.";
                   }
+
                   return null;
                 },
-                onSaved: (value) => _username = value,
               ),
+              const SizedBox(height: 10),
               TextFormField(
+                controller: _controllerPassword,
+                focusNode: _focusNodePassword,
+                obscureText: _obscurePassword,
+                keyboardType: TextInputType.visiblePassword,
                 decoration: InputDecoration(
-                  labelText: 'Password',
+                  labelText: "Password",
+                  prefixIcon: const Icon(Icons.password_outlined),
+                  suffixIcon: IconButton(
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
+                      icon: _obscurePassword
+                          ? const Icon(Icons.visibility_outlined)
+                          : const Icon(Icons.visibility_off_outlined)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
-                obscureText: true,
-                validator: (value) {
-                  if (value.isEmpty) {
-                    return 'Please enter a password';
+                validator: (String? value) {
+                  if (value == null || value.isEmpty) {
+                    return "Please enter password.";
                   }
+
                   return null;
                 },
-                onSaved: (value) => _password = value,
               ),
-              SizedBox(height: 20),
-              RaisedButton(
-                onPressed: _login,
-                child: Text('Login'),
+              const SizedBox(height: 60),
+              Column(
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    onPressed: () {
+                      if (_formKey.currentState?.validate() ?? false) {
+                        // _boxLogin.put("loginStatus", true);
+                        // _boxLogin.put("userName", _controllerUsername.text);
+
+                        // Navigator.pushReplacement(
+                        //   context,
+                        //   MaterialPageRoute(
+                        //     builder: (context) {
+                        //       return Home();
+                        //     },
+                        //   ),
+                        // );
+                      }
+                    },
+                    child: const Text("Login"),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("Don't have an account?"),
+                      TextButton(
+                        onPressed: () {
+                          _formKey.currentState?.reset();
+
+                          // Navigator.push(
+                          //   context,
+                          //   MaterialPageRoute(
+                          //     builder: (context) {
+                          //       return const Signup();
+                          //     },
+                          //   ),
+                          // );
+                        },
+                        child: const Text("Signup"),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _focusNodePassword.dispose();
+    _controllerUsername.dispose();
+    _controllerPassword.dispose();
+    super.dispose();
   }
 }
